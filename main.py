@@ -117,4 +117,4 @@ for i,layer in enumerate(layers):
 
     # Run the model
     parameters = [J, J_content, J_style, cImg, sImg, save_image]
-    model_nn(sess, generated_image, model, train_step, parameters, num_iterations=100, interval=20, add=layernames[i])
+    model_nn(sess, generated_image, model, train_step, parameters, num_iterations=pm.n_iter, interval=pm.interval, add=layernames[i])
