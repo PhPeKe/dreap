@@ -10,10 +10,17 @@ import tensorflow as tf
 from functions import *
 import parameters as pm
 
+#name = input("Please enter a name")
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+
+prepare_pictures(pm.sImg, pm.cImg)
+
 # Specify pictures
-cImg = pm.cImg
-sImg = pm.sImg
-print("\nPictures:\n",cImg, "\n",sImg)
+cImg = "input/cimg.png"
+sImg = "input/simg.png"
+print("\nPictures:\n", cImg, "\n", sImg)
 
 # Set layers for style
 standard = [
@@ -32,11 +39,11 @@ late = [
     ('conv5_1', 0.5)]
 
 deep = [
-    ('conv1_2', 0.4),
-    ('conv2_2', 0.4),
-    ('conv3_2', 0.5),
-    ('conv4_2', 0.4),
-    ('conv5_2', 0.4)]
+    ('conv1_2', 0.5),
+    ('conv2_2', 0.6),
+    ('conv3_2', 0.7),
+    ('conv4_2', 0.6),
+    ('conv5_2', 0.5)]
 
 deeper = [
     ('conv3_3', 0.33),
@@ -48,10 +55,16 @@ deeeper = [
     ('conv4_4', 0.5),
     ('conv5_4', 0.5)]
 
+layerdict = {"deep": deep,
+             "standard": standard,
+             "late": late,
+             "shallow": shallow
+             }
 
+layernames = pm.layernames
 
-layers = [shallow, deep]
-layernames = ["shallow", "deep"]
+layers = [layerdict[layer] for layer in layernames]
+print("Selected layers:\n"+str(layernames))
 
 tf.reset_default_graph()
 
@@ -61,13 +74,13 @@ print("Loading pretrained model...")
 model = load_vgg_model("pretrained-model/imagenet-vgg-verydeep-19.mat")
 print("Finished loading pretrained model")
 
-for i,layer in enumerate(layers):
+for i, layer in enumerate(layers):
     STYLE_LAYERS = layer
     # Reset the graph
 
     # Start interactive session
     print("Starting session...")
-    sess = tf.InteractiveSession()
+    sess = tf.InteractiveSession(config=config)
 
     # Read in final content image
     print("Reading and resizing images")
@@ -81,7 +94,6 @@ for i,layer in enumerate(layers):
     # Initialize generated image
     print("Initializing generated image")
     generated_image = generate_noise_image(content_image)
-
 
     # Assign the content image to be the input of the VGG model.
     print("Assigning content image...")
@@ -118,3 +130,8 @@ for i,layer in enumerate(layers):
     # Run the model
     parameters = [J, J_content, J_style, cImg, sImg, save_image]
     model_nn(sess, generated_image, model, train_step, parameters, num_iterations=pm.n_iter, interval=pm.interval, add=layernames[i])
+
+#save = ""
+#while ""
+#input("Should the")
+#os.system("mkdir "+str(name)+"; ")

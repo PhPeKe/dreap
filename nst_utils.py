@@ -9,6 +9,8 @@ from matplotlib.pyplot import imshow
 from PIL import Image
 from nst_utils import *
 import parameters as pm
+import imageio
+import cv2
 
 import numpy as np
 import tensorflow as tf
@@ -20,8 +22,6 @@ class CONFIG:
     NOISE_RATIO = pm.noise
     MEANS = np.array([123.68, 116.779, 103.939]).reshape((1,1,1,3))
     VGG_MODEL = 'pretrained-model/imagenet-vgg-verydeep-19.mat' # Pick the VGG 19-layer model by from the paper "Very Deep Convolutional Networks for Large-Scale Image Recognition".
-#    STYLE_IMAGE = 'images/hanson_style.jpg (800×598)' # Style image to use.
-#    CONTENT_IMAGE = 'images/420_content.jpg' # Content image to use.
     OUTPUT_DIR = 'output/'
 
 def load_vgg_model(path):
@@ -89,6 +89,7 @@ def load_vgg_model(path):
         W = wb[0][0]
         b = wb[0][1]
         layer_name = vgg_layers[0][layer][0][0][0][0]
+        #layer_name = vgg_layers[0][0][0][0][3][0]
         assert layer_name == expected_layer_name
         return W, b
 
@@ -186,4 +187,5 @@ def save_image(path, image):
 
     # Clip and Save the image
     image = np.clip(image[0], 0, 255).astype('uint8')
-    scipy.misc.imsave(path, image)
+#    scipy.misc.imsave(path, image)
+    imageio.imsave(path, image)

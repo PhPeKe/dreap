@@ -1,7 +1,19 @@
+
 import tensorflow as tf
 import parameters as pm
+import cv2
 
-# GRADED FUNCTION: compute_content_cost
+
+def prepare_pictures(s, c):
+    simg = cv2.imread(s)
+    cimg = cv2.imread(c)
+    size = (pm.width, pm.height)
+    simg = cv2.resize(simg, dsize=size)
+    cimg = cv2.resize(cimg, dsize=size)
+    cv2.imwrite("input/simg.png", simg)
+    cv2.imwrite("input/cimg.png", cimg)
+    print("Pictures resized!")
+
 
 def compute_content_cost(a_C, a_G):
     """
@@ -15,20 +27,21 @@ def compute_content_cost(a_C, a_G):
     J_content -- scalar that you compute using equation 1 above.
     """
 
-    # Retrieve dimensions from a_G (≈1 line)
+    # Retrieve dimensions from a_G
     m, n_H, n_W, n_C = a_G.get_shape().as_list()
 
-    # Reshape a_C and a_G (≈2 lines)
-    a_C_unrolled = tf.reshape(tf.transpose(a_C), (n_H * n_W, n_C))#tf.reshape(tf.transpose(a_C), (n_H * n_W, n_C))
-    a_G_unrolled = tf.reshape(tf.transpose(a_G), (n_H * n_W, n_C))#tf.reshape(tf.transpose(a_G), (n_H * n_W, n_C))
+    # Reshape a_C and a_G
+    a_C_unrolled = tf.reshape(tf.transpose(a_C), (n_H * n_W, n_C))  # tf.reshape(tf.transpose(a_C), (n_H * n_W, n_C))
+    a_G_unrolled = tf.reshape(tf.transpose(a_G), (n_H * n_W, n_C))  # tf.reshape(tf.transpose(a_G), (n_H * n_W, n_C))
 
-    # compute the cost with tensorflow (≈1 line)
-    J_content = tf.reduce_sum(tf.divide(tf.square((tf.subtract(a_C_unrolled, a_G_unrolled))), (4.* n_H * n_W * n_C)))
-    #tf.divide(1, (4 * n_H * n_C * n_W)) * tf.reduce_sum(tf.square(tf.subtract(a_C_unrolled, a_G_unrolled)))
+    # compute the cost with tensorflow
+    J_content = tf.reduce_sum(tf.divide(tf.square((tf.subtract(a_C_unrolled, a_G_unrolled))), (4. * n_H * n_W * n_C)))
+    # tf.divide(1, (4 * n_H * n_C * n_W)) * tf.reduce_sum(tf.square(tf.subtract(a_C_unrolled, a_G_unrolled)))
 
     return J_content
 
-#########################################################################################################################
+########################################################################################################################
+
 
 def gram_matrix(A):
     """
@@ -44,40 +57,10 @@ def gram_matrix(A):
 
     return GA
 
-#########################################################################################################################
+########################################################################################################################
 
-# GRADED FUNCTION: compute_content_cost
 
-def compute_content_cost(a_C, a_G):
-    """
-    Computes the content cost
-
-    Arguments:
-    a_C -- tensor of dimension (1, n_H, n_W, n_C), hidden layer activations representing content of the image C
-    a_G -- tensor of dimension (1, n_H, n_W, n_C), hidden layer activations representing content of the image G
-
-    Returns:
-    J_content -- scalar that you compute using equation 1 above.
-    """
-
-    # YOUR CODE HERE
-    # Retrieve dimensions from a_G (≈1 line)
-    m, n_H, n_W, n_C = a_G.get_shape().as_list()
-
-    # Reshape a_C and a_G (≈2 lines)
-    a_C_unrolled = tf.reshape(tf.transpose(a_C), (n_H * n_W, n_C))#tf.reshape(tf.transpose(a_C), (n_H * n_W, n_C))
-    a_G_unrolled = tf.reshape(tf.transpose(a_G), (n_H * n_W, n_C))#tf.reshape(tf.transpose(a_G), (n_H * n_W, n_C))
-
-    # compute the cost with tensorflow (≈1 line)
-    J_content = tf.reduce_sum(tf.divide(tf.square((tf.subtract(a_C_unrolled, a_G_unrolled))), (4.* n_H * n_W * n_C)))
-    #tf.divide(1, (4 * n_H * n_C * n_W)) * tf.reduce_sum(tf.square(tf.subtract(a_C_unrolled, a_G_unrolled)))
-    # YOUR CODE ENDS HERE
-
-    return J_content
-
-#########################################################################################################################
 # GRADED FUNCTION: compute_layer_style_cost
-
 def compute_layer_style_cost(a_S, a_G):
     """
     Arguments:
@@ -100,11 +83,12 @@ def compute_layer_style_cost(a_S, a_G):
     GG = gram_matrix(a_G)
 
     # Computing the loss
-    J_style_layer = tf.reduce_sum(tf.square(tf.subtract(GS, GG)) / (4* (n_H * n_W * n_C)**2))
+    J_style_layer = tf.reduce_sum(tf.square(tf.subtract(GS, GG)) / (4 * (n_H * n_W * n_C)**2))
 
     return J_style_layer
 
-#########################################################################################################################
+########################################################################################################################
+
 
 def compute_style_cost(model, STYLE_LAYERS, sess):
     """
@@ -191,7 +175,7 @@ def model_nn(sess, input_image, model, train_step, parameters, num_iterations = 
         # Print every 20 iteration.
         if i%interval == 0:
             Jt, Jc, Js = sess.run([J, J_content, J_style])
-            print("Iteration " + str(i) + " :")
+            print("Saving pictures in iteration " + str(i) + " :")
             print("total cost = " + str(Jt))
             print("content cost = " + str(Jc))
             print("style cost = " + str(Js))
@@ -200,7 +184,7 @@ def model_nn(sess, input_image, model, train_step, parameters, num_iterations = 
             save_image("output/" + str(i) + add + ".png", generated_image)
 
     # save last generated image
-    save_image('output/generated_image' + add + '.jpg', generated_image)
+    save_image('output/generated_image' + add + '.png', generated_image)
 
     return generated_image
 
