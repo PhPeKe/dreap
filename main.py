@@ -1,16 +1,7 @@
-import os
-import sys
-import scipy.misc
 from skimage import io
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import imshow
 from nst_utils import *
-import numpy as np
-import tensorflow as tf
 from functions import *
 import parameters as pm
-
-#name = input("Please enter a name")
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -30,6 +21,59 @@ standard = [
     ('conv4_1', 0.2),
     ('conv5_1', 0.2)]
 
+standard_conv1 = [
+    ('conv1_1', 1.0),
+    ('conv2_1', 0.2),
+    ('conv3_1', 0.2),
+    ('conv4_1', 0.2),
+    ('conv5_1', 0.2)]
+
+standard_conv2 = [
+    ('conv1_1', 0.2),
+    ('conv2_1', 1.0),
+    ('conv3_1', 0.2),
+    ('conv4_1', 0.2),
+    ('conv5_1', 0.2)]
+
+standard_conv3 = [
+    ('conv1_1', 0.2),
+    ('conv2_1', 0.2),
+    ('conv3_1', 1.0),
+    ('conv4_1', 0.2),
+    ('conv5_1', 0.2)]
+
+standard_conv4 = [
+    ('conv1_1', 0.2),
+    ('conv2_1', 0.2),
+    ('conv3_1', 0.2),
+    ('conv4_1', 1.0),
+    ('conv5_1', 0.2)]
+
+standard_conv5 = [
+    ('conv1_1', 0.2),
+    ('conv2_1', 0.2),
+    ('conv3_1', 0.2),
+    ('conv4_1', 0.2),
+    ('conv5_1', 1.0)]
+
+many = [
+    ('conv1_1', 0.2),
+    ('conv1_2', 0.2),
+    ('conv2_1', 0.2),
+    ('conv2_2', 0.2),
+    ('conv3_1', 0.2),
+    ('conv3_2', 0.2),
+    ('conv3_3', 0.2),
+    ('conv3_4', 0.2),
+    ('conv4_1', 0.2),
+    ('conv4_2', 0.2),
+    ('conv4_3', 0.2),
+    ('conv4_4', 0.2),
+    ('conv5_1', 0.2),
+    ('conv5_2', 0.2),
+    ('conv5_3', 0.2),
+    ('conv5_4', 0.2)]
+
 shallow = [
     ('conv1_1', 0.5),
     ('conv2_1', 0.5)]
@@ -45,6 +89,20 @@ deep = [
     ('conv4_2', 0.6),
     ('conv5_2', 0.5)]
 
+deep_flat = [
+    ('conv1_2', 0.5),
+    ('conv2_2', 0.5),
+    ('conv3_2', 0.5),
+    ('conv4_2', 0.5),
+    ('conv5_2', 0.5)]
+
+deep_low = [
+    ('conv1_2', 0.2),
+    ('conv2_2', 0.2),
+    ('conv3_2', 0.2),
+    ('conv4_2', 0.2),
+    ('conv5_2', 0.2)]
+
 deeper = [
     ('conv3_3', 0.33),
     ('conv4_3', 0.33),
@@ -55,15 +113,79 @@ deeeper = [
     ('conv4_4', 0.5),
     ('conv5_4', 0.5)]
 
+conv1_1 = [
+    ('conv1_1', 0.2)]
+conv1_2 = [
+    ('conv1_2', 0.2)]
+conv2_1 = [
+    ('conv2_1', 0.2)]
+conv2_2 = [
+    ('conv2_2', 0.2)]
+conv3_1 = [
+    ('conv3_1', 0.2)]
+conv3_2 = [
+    ('conv3_3', 0.2)]
+conv3_3 = [
+    ('conv3_3', 0.2)]
+conv3_4 = [
+    ('conv3_4', 0.2)]
+conv4_1 = [
+    ('conv4_1', 0.2)]
+conv4_2 = [
+    ('conv4_2', 0.2)]
+conv4_3 = [
+    ('conv4_3', 0.2)]
+conv4_4 = [
+    ('conv4_4', 0.2)]
+conv5_1 = [
+    ('conv5_1', 0.2)]
+conv5_2 = [
+    ('conv5_2', 0.2)]
+conv5_3 = [
+    ('conv5_3', 0.2)]
+conv5_4 = [
+    ('conv5_4', 0.2)]
+
 layerdict = {"deep": deep,
+             "deeper": deeper,
+             "deeeper": deeeper,
+             "deepflat": deep_flat,
+             "deeplow": deep_low,
              "standard": standard,
+             "standard_conv1": standard_conv1,
+             "standard_conv2": standard_conv2,
+             "standard_conv3": standard_conv3,
+             "standard_conv4": standard_conv4,
+             "standard_conv5": standard_conv5,
+             "many": many,
              "late": late,
+             "shallow": shallow,
+             "conv1_1": conv1_1,
+             "conv1_2": conv1_2,
+             "conv2_1": conv2_1,
+             "conv2_2": conv2_2,
+             "conv3_1": conv3_1,
+             "conv3_2": conv3_2,
+             "conv3_2": conv3_2,
+             "conv3_2": conv3_2,
+             "conv4_1": conv4_1,
+             "conv4_2": conv4_2,
+             "conv4_3": conv4_3,
+             "conv4_4": conv4_4,
+             "conv5_1": conv5_1,
+             "conv5_2": conv5_2,
+             "conv5_3": conv5_3,
+             "conv5_4": conv5_4,
              "shallow": shallow
              }
 
 layernames = pm.layernames
-
-layers = [layerdict[layer] for layer in layernames]
+if "all" in layernames:
+    layers = [layerdict[layer] for layer in layerdict.keys()]
+    layernames = list(layerdict.keys())
+else:
+    layers = [layerdict[layer] for layer in layernames]
+# Override for all layer configs
 print("Selected layers:\n"+str(layernames))
 
 tf.reset_default_graph()
@@ -106,7 +228,7 @@ for i, layer in enumerate(layers):
     # Set a_C to be the hidden layer activation from the layer we have selected
     a_C = sess.run(out)
 
-    # Set a_G to be the hidden layer activation from same layer. Here, a_G references model['conv4_2']
+    #     # Set a_G to be the hidden layer activation from same layer. Here, a_G references model['conv4_2']
     # and isn't evaluated yet. Later in the code, we'll assign the image G as the model input, so that
     # when we run the session, this will be the activations drawn from the appropriate layer, with G as input.
     a_G = out
@@ -122,16 +244,14 @@ for i, layer in enumerate(layers):
     J = total_cost(J_content, J_style)
 
     # define optimizer
-    optimizer = tf.train.AdamOptimizer(2.0)
+    optimizer = tf.train.AdamOptimizer(pm.learning_rate)
 
     # define train_step
     train_step = optimizer.minimize(J)
 
     # Run the model
     parameters = [J, J_content, J_style, cImg, sImg, save_image]
-    model_nn(sess, generated_image, model, train_step, parameters, num_iterations=pm.n_iter, interval=pm.interval, add=layernames[i])
+    model_nn(sess, generated_image, model, train_step, parameters, num_iterations=pm.n_iter, interval=pm.interval,
+             add=layernames[i])
 
-#save = ""
-#while ""
-#input("Should the")
-#os.system("mkdir "+str(name)+"; ")
+    sess.close()
